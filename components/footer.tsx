@@ -105,14 +105,14 @@ export function Footer() {
             {/* Social Links */}
             <div className="flex items-center gap-4">
               {socialLinks.map((social) => (
-                <a
+                <Link
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
                   className="w-12 h-12 rounded-full border border-[oklch(0.35_0.02_50)] flex items-center justify-center hover:border-[oklch(0.70_0.05_75)] hover:text-[oklch(0.70_0.05_75)] transition-all duration-300"
                 >
                   <social.icon className="w-5 h-5" strokeWidth={1.2} />
-                </a>
+                </Link>
               ))}
             </div>
           </div>

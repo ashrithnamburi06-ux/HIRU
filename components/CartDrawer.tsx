@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X } from "lucide-react";
 import { useCartWishlist } from "@/context/CartWishlistContext";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -129,14 +130,12 @@ export function CartDrawer() {
                     <span>Total</span>
                     <span>{`₹${total.toLocaleString()}`}</span>
                   </div>
-                  <button
-                    onClick={() => {
-                      window.location.href = "/checkout";
-                    }}
-                    className="w-full py-2 mt-2 bg-[oklch(0.22_0.02_50)] text-white rounded hover:bg-[oklch(0.22_0.02_55)] transition"
+                  <Link
+                    href="/checkout"
+                    className="w-full py-2 mt-2 bg-[oklch(0.22_0.02_50)] text-white rounded hover:bg-[oklch(0.22_0.02_55)] transition text-center block"
                   >
                     Proceed to Checkout
-                  </button>
+                  </Link>
                 </div>
               )}
             </motion.aside>

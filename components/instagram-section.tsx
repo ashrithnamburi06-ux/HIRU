@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion"
 import { Instagram } from "lucide-react"
+import Link from "next/link"
 
 const instagramImages = [
   {
@@ -97,7 +98,7 @@ export function InstagramSection() {
           transition={{ duration: 0.8, delay: 0.3 }}
           className="text-center mt-16"
         >
-          <a
+          <Link
             href="https://instagram.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -105,7 +106,7 @@ export function InstagramSection() {
           >
             <span className="text-[11px] tracking-[0.35em] uppercase font-medium">Follow Us on Instagram</span>
             <Instagram className="w-5 h-5" strokeWidth={1.5} />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>
