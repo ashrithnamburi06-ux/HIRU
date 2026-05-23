@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import Image, { type ImageProps } from 'next/image'
+import NextImage, { type ImageProps } from 'next/image'
 import { cn } from '@/lib/utils'
 import { LOCAL_IMAGES } from '@/lib/images/local-assets'
 import { resolveImageSrc } from '@/lib/images/resolve'
@@ -16,7 +16,7 @@ export function OptimizedImage({
   containerClassName,
   fill,
   sizes,
-  priority,
+  priority = false,
   placeholder,
   blurDataURL,
   loading,
@@ -26,22 +26,25 @@ export function OptimizedImage({
   ...props
 }: OptimizedImageProps) {
   const resolvedFallback = resolveImageSrc(
-    typeof fallbackSrc === 'string' ? fallbackSrc : undefined,
+    typeof fallbackSrc === 'string'
+      ? fallbackSrc
+      : LOCAL_IMAGES.productDefault,
     LOCAL_IMAGES.productDefault
   )
-  const resolvedInitial = resolveImageSrc(
-    typeof src === 'string' ? src : undefined,
-    resolvedFallback
-  )
 
-  const [imgSrc, setImgSrc] = useState(resolvedInitial)
-  const imageLoading = priority ? undefined : loading ?? 'lazy'
-  const isLocal = imgSrc.startsWith('/images/')
-  const imagePlaceholder = placeholder ?? (isLocal ? 'empty' : 'blur')
+  const [imgSrc, setImgSrc] = useState<string>(
+    resolveImageSrc(
+      typeof src === 'string' ? src : undefined,
+      resolvedFallback
+    )
+  )
 
   useEffect(() => {
     setImgSrc(
-      resolveImageSrc(typeof src === 'string' ? src : undefined, resolvedFallback)
+      resolveImageSrc(
+        typeof src === 'string' ? src : undefined,
+        resolvedFallback
+      )
     )
   }, [src, resolvedFallback])
 
@@ -51,18 +54,32 @@ export function OptimizedImage({
     }
   }
 
-  // fill: parent must be position:relative with explicit size (aspect-* or inset-0)
+  const imageLoading = priority ? undefined : loading ?? 'lazy'
+
+  const isLocalImage =
+    typeof imgSrc === 'string' &&
+    (imgSrc.startsWith('/images/') ||
+      imgSrc.startsWith('/'))
+
+  const imagePlaceholder =
+    placeholder ?? (isLocalImage ? 'empty' : 'blur')
+
+  // FILL IMAGE MODE
   if (fill) {
     return (
-      <Image
+      <NextImage
         fill
         src={imgSrc}
-        alt={alt}
-        sizes={sizes}
+        alt={alt || 'HIRU Elegance'}
+        sizes={sizes || '100vw'}
         priority={priority}
-        placeholder={imagePlaceholder}
-        blurDataURL={imagePlaceholder === 'blur' ? blurDataURL : undefined}
         loading={imageLoading}
+        placeholder={imagePlaceholder}
+        blurDataURL={
+          imagePlaceholder === 'blur'
+            ? blurDataURL
+            : undefined
+        }
         onError={handleError}
         className={cn('object-cover', className)}
         {...props}
@@ -70,20 +87,36 @@ export function OptimizedImage({
     )
   }
 
+  // NORMAL IMAGE MODE
   return (
     <div className={cn('relative overflow-hidden', containerClassName)}>
-      <Image
+      <NextImage
         src={imgSrc}
-        alt={alt}
+        alt={alt || 'HIRU Elegance'}
+        width={
+          typeof props.width === 'number'
+            ? props.width
+            : 800
+        }
+        height={
+          typeof props.height === 'number'
+            ? props.height
+            : 1000
+        }
         sizes={sizes}
         priority={priority}
-        placeholder={imagePlaceholder}
-        blurDataURL={imagePlaceholder === 'blur' ? blurDataURL : undefined}
         loading={imageLoading}
+        placeholder={imagePlaceholder}
+        blurDataURL={
+          imagePlaceholder === 'blur'
+            ? blurDataURL
+            : undefined
+        }
         onError={handleError}
-        width={props.width ?? 800}
-        height={props.height ?? 1000}
-        className={cn('h-full w-full object-cover', className)}
+        className={cn(
+          'h-full w-full object-cover',
+          className
+        )}
         {...props}
       />
     </div>
