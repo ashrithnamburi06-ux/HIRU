@@ -1,14 +1,15 @@
 "use client"
 
-import { useState, useRef } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useRef, useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 
 import { products } from "@/lib/products"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { Search, User, Heart, ShoppingBag, Menu, X } from "lucide-react"
+import { useCartWishlist } from "@/context/CartWishlistContext"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 
@@ -33,7 +34,8 @@ export function Navbar() {
     const [searchTerm, setSearchTerm] = useState("")
   const [showSuggestions, setShowSuggestions] = useState(false)
   const router = useRouter()
-  const { openCart } = useCartWishlist()
+  const { openCart } = useCartWishlist();
+  const pathname = usePathname();
   const inputRef = useRef(null)
 
   const filteredProducts = searchTerm
