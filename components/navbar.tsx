@@ -1,22 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useRef } from "react"
+import { useRouter } from "next/navigation"
+
+import { products } from "@/lib/products"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
+import Image from "next/image"
 import { Search, User, Heart, ShoppingBag, Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 
+
 const leftNavLinks = [
-  { name: "New In", href: "#" },
-  { name: "Best Sellers", href: "#" },
-  { name: "Dresses", href: "#" },
+  { name: "New In", href: "/collections?category=new" },
+  { name: "Best Sellers", href: "/collections?category=bestseller" },
+  { name: "Dresses", href: "/category/dresses" },
 ]
 
 const rightNavLinks = [
-  { name: "Co-ord Sets", href: "#" },
-  { name: "Ethnic", href: "#" },
-  { name: "Accessories", href: "#" },
+  { name: "Co-ord Sets", href: "/category/coord-sets" },
+  { name: "Ethnic", href: "/category/ethnic" },
+  { name: "Accessories", href: "/category/accessories" },
 ]
 
 const allNavLinks = [...leftNavLinks, ...rightNavLinks]
@@ -24,6 +30,27 @@ const allNavLinks = [...leftNavLinks, ...rightNavLinks]
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("")
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const router = useRouter()
+  const { openCart } = useCartWishlist()
+  const inputRef = useRef(null)
+
+  const filteredProducts = searchTerm
+    ? products.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+      ).slice(0, 5)
+    : []
+
+  const handleSelect = (id: number) => {
+    setSearchTerm("")
+    setShowSuggestions(false)
+    router.push(`/product/${id}`)
+  }
+  const { cart, wishlist, user } = useCartWishlist()
+
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+  const wishlistCount = wishlist.length
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,6 +59,11 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // If on home page, navbar is transparent at top and dark when scrolled.
+  // On other pages, it is always dark for legibility.
+  const isHomePage = pathname === "/"
+  const showDarkBg = isScrolled || !isHomePage
 
   return (
     <>
@@ -47,14 +79,14 @@ export function Navbar() {
         </p>
       </motion.div>
 
-      {/* Main Navbar */}
+      {/* Main Header */}
       <motion.header
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.8 }}
         className={`fixed top-[38px] left-0 right-0 z-40 transition-all duration-500 ease-out ${
-          isScrolled
-            ? "bg-[oklch(0.12_0.02_50)]/80 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-[oklch(0.98_0.005_85)]/5"
+          showDarkBg
+            ? "bg-[oklch(0.12_0.02_50)]/90 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-[oklch(0.98_0.005_85)]/5"
             : "bg-transparent"
         }`}
       >
@@ -111,21 +143,61 @@ export function Navbar() {
 
                 {/* Icons */}
                 <div className="flex items-center gap-5">
-                  <button className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
-                    <Search className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </button>
-                  <button className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
+                  <div className="relative">
+  <input
+    ref={inputRef}
+    type="text"
+    placeholder="Search products..."
+    value={searchTerm}
+    onChange={(e) => { setSearchTerm(e.target.value); setShowSuggestions(true); }}
+    onFocus={() => setShowSuggestions(true)}
+    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+    className="w-48 px-2 py-1 rounded bg-[oklch(0.95_0.01_85)] text-[oklch(0.15_0.02_50)] focus:outline-none"
+  />
+  <AnimatePresence>
+    {showSuggestions && filteredProducts.length > 0 && (
+      <motion.ul
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        className="absolute left-0 right-0 mt-1 bg-white shadow-lg rounded z-10"
+      >
+        {filteredProducts.map((p) => (
+          <li
+            key={p.id}
+            onMouseDown={() => handleSelect(p.id)}
+            className="flex items-center p-2 hover:bg-[oklch(0.90_0.02_80)] cursor-pointer"
+          >
+            <Image src={p.image} alt={p.name} width={40} height={40} className="object-cover mr-2 rounded" />
+            <div className="flex flex-col">
+              <span className="text-sm font-medium">{p.name}</span>
+              <span className="text-xs text-[oklch(0.45_0.02_55)]">{p.priceString}</span>
+            </div>
+          </li>
+        ))}
+      </motion.ul>
+    )}
+  </AnimatePresence>
+</div>
+                  <Link href={user ? "/profile" : "/login"} className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
                     <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </button>
-                  <button className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
+                  </Link>
+                  <Link href="/wishlist" className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
                     <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </button>
-                  <button className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
+                    {wishlistCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
+                        {wishlistCount}
+                      </span>
+                    )}
+                  </Link>
+                  <Link href="/cart" className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
                     <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                    <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
-                      0
-                    </span>
-                  </button>
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
+                  </Link>
                 </div>
               </div>
             </div>
@@ -190,12 +262,25 @@ export function Navbar() {
                     {/* Mobile Menu Footer */}
                     <div className="px-8 py-8 border-t border-[oklch(0.98_0.005_85)]/10">
                       <div className="flex items-center gap-6">
-                        <button className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
+                        <Link 
+                          href={user ? "/profile" : "/login"} 
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors"
+                        >
                           <User className="h-5 w-5" strokeWidth={1.5} />
-                        </button>
-                        <button className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
+                        </Link>
+                        <Link 
+                          href="/wishlist" 
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors"
+                        >
                           <Heart className="h-5 w-5" strokeWidth={1.5} />
-                        </button>
+                          {wishlistCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[8px] font-medium rounded-full flex items-center justify-center">
+                              {wishlistCount}
+                            </span>
+                          )}
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -216,15 +301,17 @@ export function Navbar() {
 
               {/* Mobile Icons */}
               <div className="flex items-center gap-4 -mr-2">
-                <button className="text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
+                <Link href="/search" className="text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
                   <Search className="h-5 w-5" strokeWidth={1.5} />
-                </button>
-                <button className="relative text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
+                </Link>
+                <Link href="/cart" className="relative text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
                   <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
-                    0
-                  </span>
-                </button>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
+                      {cartCount}
+                    </span>
+                  )}
+                </Link>
               </div>
             </div>
           </div>
