@@ -37,6 +37,17 @@ export function Navbar() {
     return pathname.startsWith(href)
   }
 
+  // Determine if current page has dark hero (homepage) or light background
+  const isDarkHero = pathname === "/"
+  const textColor = isDarkHero ? "text-white/90" : "text-[#4B3A2F]/90"
+  const textHoverColor = isDarkHero ? "hover:text-white" : "hover:text-[#4B3A2F]"
+  const activeTextColor = isDarkHero ? "text-[#D9B88F]" : "text-[#4B3A2F]"
+  const logoColor = isDarkHero ? "text-white" : "text-[#4B3A2F]"
+  const logoHoverColor = isDarkHero ? "hover:text-[#D9B88F]" : "hover:text-[#6B5A4F]"
+  const accentColor = "#D9B88F"
+  const iconColor = isDarkHero ? "text-white/90" : "text-[#4B3A2F]/90"
+  const iconHoverColor = isDarkHero ? "hover:text-white" : "hover:text-[#4B3A2F]"
+
   return (
     <>
       {/* Main Navbar - Slim Boutique Style */}
@@ -46,7 +57,9 @@ export function Navbar() {
         transition={{ delay: 0.2, duration: 0.8 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           isScrolled
-            ? "bg-black/30 backdrop-blur-md"
+            ? isDarkHero
+              ? "bg-black/30 backdrop-blur-md"
+              : "bg-[oklch(0.97_0.008_75)]/90 backdrop-blur-md shadow-sm"
             : "bg-transparent"
         }`}
       >
@@ -63,10 +76,10 @@ export function Navbar() {
               >
                 <Link href="/" className="group">
                   <div className="flex items-baseline gap-3">
-                    <h1 className="font-serif text-2xl xl:text-[1.65rem] font-light text-white tracking-[0.2em] group-hover:text-[#D9B88F] transition-colors duration-300">
+                    <h1 className={`font-serif text-2xl xl:text-[1.65rem] font-light tracking-[0.2em] transition-colors duration-300 ${logoColor} ${logoHoverColor}`}>
                       HIRU
                     </h1>
-                    <span className="font-serif text-[10px] xl:text-[11px] font-light italic text-[#D9B88F]/80 tracking-wide">
+                    <span className={`font-serif text-[10px] xl:text-[11px] font-light italic tracking-wide ${isDarkHero ? 'text-[#D9B88F]/80' : 'text-[#6B5A4F]/70'}`}>
                       Elegance
                     </span>
                   </div>
@@ -92,10 +105,10 @@ export function Navbar() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="relative group font-serif text-[13px] xl:text-[14px] font-light tracking-[0.1em] text-white/90 hover:text-white transition-colors duration-300"
+                        className={`relative group font-serif text-[13px] xl:text-[14px] font-light tracking-[0.1em] transition-colors duration-300 ${textColor} ${textHoverColor}`}
                       >
                         {link.name}
-                        <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[#D9B88F] group-hover:w-full transition-all duration-300" />
+                        <span className={`absolute -bottom-1 left-0 w-0 h-[1px] transition-all duration-300`} style={{ backgroundColor: accentColor }} />
                       </a>
                     ) : (
                       <Link
@@ -104,15 +117,15 @@ export function Navbar() {
                       >
                         <span className={`font-serif text-[13px] xl:text-[14px] font-light tracking-[0.1em] transition-colors duration-300 ${
                           isActiveLink(link.href)
-                            ? "text-[#D9B88F]"
-                            : "text-white/90 hover:text-white"
+                            ? activeTextColor
+                            : `${textColor} ${textHoverColor}`
                         }`}>
                           {link.name}
                         </span>
                         {isActiveLink(link.href) && (
-                          <span className="absolute -bottom-1 left-0 w-full h-[1px] bg-[#D9B88F]" />
+                          <span className={`absolute -bottom-1 left-0 w-full h-[1px]`} style={{ backgroundColor: accentColor }} />
                         )}
-                        <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[#D9B88F] group-hover:w-full transition-all duration-300" />
+                        <span className={`absolute -bottom-1 left-0 w-0 h-[1px] group-hover:w-full transition-all duration-300`} style={{ backgroundColor: accentColor }} />
                       </Link>
                     )}
                   </motion.div>
@@ -126,16 +139,16 @@ export function Navbar() {
                 transition={{ delay: 0.5, duration: 0.6 }}
                 className="flex items-center gap-4 xl:gap-5"
               >
-                <button className="group p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`group p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <Search className="w-4.5 h-4.5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
                 </button>
-                <button className="group p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`group p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <User className="w-4.5 h-4.5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
                 </button>
-                <button className="group p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`group p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <Heart className="w-4.5 h-4.5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
                 </button>
-                <button className="group relative p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`group relative p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <ShoppingBag className="w-4.5 h-4.5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
                   {cartCount > 0 && (
                     <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-[#D9B88F] text-[#1A1008] text-[8px] font-medium rounded-full flex items-center justify-center">
@@ -154,7 +167,7 @@ export function Navbar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-white/90 hover:text-white hover:bg-white/10 -ml-2 transition-all duration-300"
+                    className={`${iconColor} ${iconHoverColor} hover:bg-white/10 -ml-2 transition-all duration-300`}
                   >
                     <Menu className="h-5 w-5" strokeWidth={1.5} />
                   </Button>
@@ -240,10 +253,10 @@ export function Navbar() {
               {/* Mobile Logo */}
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
                 <div className="flex items-baseline gap-2">
-                  <span className="font-serif text-[1.4rem] font-light text-white tracking-[0.2em]">
+                  <span className={`font-serif text-[1.4rem] font-light tracking-[0.2em] ${logoColor} ${logoHoverColor} transition-colors duration-300`}>
                     HIRU
                   </span>
-                  <span className="font-serif text-[9px] font-light italic text-[#D9B88F]/80 tracking-wide">
+                  <span className={`font-serif text-[9px] font-light italic tracking-wide ${isDarkHero ? 'text-[#D9B88F]/80' : 'text-[#6B5A4F]/70'}`}>
                     Elegance
                   </span>
                 </div>
@@ -251,10 +264,10 @@ export function Navbar() {
 
               {/* Mobile Icons */}
               <div className="flex items-center gap-3 -mr-2">
-                <button className="p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <Search className="w-4.5 h-4.5" strokeWidth={1.5} />
                 </button>
-                <button className="relative p-1.5 text-white/90 hover:text-white transition-colors duration-300">
+                <button className={`relative p-1.5 transition-colors duration-300 ${iconColor} ${iconHoverColor}`}>
                   <ShoppingBag className="w-4.5 h-4.5" strokeWidth={1.5} />
                   {cartCount > 0 && (
                     <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#D9B88F] text-[#1A1008] text-[7px] font-medium rounded-full flex items-center justify-center">
