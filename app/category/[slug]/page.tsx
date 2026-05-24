@@ -8,8 +8,13 @@ export default function CategoryPage({ params }: { params: Promise<{ slug: strin
   const resolvedParams = React.use(params)
 
   useEffect(() => {
-    router.replace(`/collections?category=${resolvedParams.slug}`)
-  }, [resolvedParams.slug, router])
+    const slug = resolvedParams?.slug || ""
+    if (slug) {
+      router.replace(`/collections?category=${encodeURIComponent(slug)}`)
+    } else {
+      router.replace('/collections')
+    }
+  }, [resolvedParams?.slug, router])
 
   return (
     <div className="min-h-screen bg-[oklch(0.97_0.008_75)] flex items-center justify-center">

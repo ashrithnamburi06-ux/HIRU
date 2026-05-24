@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Heart, Search as SearchIcon, SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
 import { ProductCard } from "@/components/ui/ProductCard";
 import Link from "next/link"
+import Image from "next/image"
 import { products, Product } from "@/lib/products"
 import { useCartWishlist } from "@/context/CartWishlistContext"
 import { useToast } from "@/hooks/use-toast"
@@ -191,7 +192,7 @@ function CollectionsContent() {
               {paginatedProducts.map((product) => (
                 <Link
                   key={product.id}
-                  href={`/product/${product.slug}`}
+                  href={`/product/${product.id}`}
                   className="group"
                 >
                   <div className="overflow-hidden rounded-lg">
