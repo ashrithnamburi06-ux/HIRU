@@ -1,288 +1,257 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
-import { useRouter, usePathname } from "next/navigation"
-
-import { products } from "@/lib/products"
+import { useState, useEffect } from "react"
 import Link from "next/link"
-
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
 import { Search, User, Heart, ShoppingBag, Menu, X } from "lucide-react"
-import { useCartWishlist } from "@/context/CartWishlistContext"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet"
+import { useCartWishlist } from "@/context/CartWishlistContext"
 
-
-const leftNavLinks = [
-  { name: "New In", href: "/collections?category=new" },
-  { name: "Best Sellers", href: "/collections?category=bestseller" },
-  { name: "Dresses", href: "/category/dresses" },
+const navLinks = [
+  { name: "Home", href: "/" },
+  { name: "Shop", href: "/collections" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+  { name: "Instagram", href: "https://instagram.com", external: true },
 ]
-
-const rightNavLinks = [
-  { name: "Co-ord Sets", href: "/category/coord-sets" },
-  { name: "Ethnic", href: "/category/ethnic" },
-  { name: "Accessories", href: "/category/accessories" },
-]
-
-const allNavLinks = [...leftNavLinks, ...rightNavLinks]
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-    const [searchTerm, setSearchTerm] = useState("")
-  const [showSuggestions, setShowSuggestions] = useState(false)
-  const router = useRouter()
-  const { openCart } = useCartWishlist();
-  const pathname = usePathname();
-  const inputRef = useRef(null)
-
-  const filteredProducts = searchTerm
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-      ).slice(0, 5)
-    : []
-
-  const handleSelect = (id: number) => {
-    setSearchTerm("")
-    setShowSuggestions(false)
-    router.push(`/product/${id}`)
-  }
-  const { cart, wishlist, user } = useCartWishlist()
-
+  const pathname = usePathname()
+  const { cart } = useCartWishlist()
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-  const wishlistCount = wishlist.length
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
+      setIsScrolled(window.scrollY > 20)
     }
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  // If on home page, navbar is transparent at top and dark when scrolled.
-  // On other pages, it is always dark for legibility.
-  const isHomePage = pathname === "/"
-  const showDarkBg = isScrolled || !isHomePage
+  const isActiveLink = (href: string) => {
+    if (href === "/") return pathname === "/"
+    return pathname.startsWith(href)
+  }
 
   return (
     <>
-      {/* Announcement Bar */}
+      {/* Announcement Bar - Soft Boutique Style */}
       <motion.div
-        initial={{ y: -50 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="fixed top-0 left-0 right-0 z-50 bg-[oklch(0.22_0.02_50)] text-[oklch(0.92_0.02_80)] py-2.5 text-center"
+        initial={{ y: -30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 1, ease: [0.25, 0.1, 0.25, 1] }}
+        className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-[oklch(0.96_0.015_80)] via-[oklch(0.97_0.012_82)] to-[oklch(0.96_0.015_80)] text-center border-b border-[oklch(0.90_0.02_75)]/40"
       >
-        <p className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase font-light">
-          Complimentary Shipping on All Orders Above ₹4,999
-        </p>
+        <div className="py-3 px-6">
+          <p className="text-[10px] sm:text-[11px] tracking-[0.35em] uppercase font-light text-[oklch(0.45_0.03_55)]">
+            Complimentary Shipping on Orders Above ₹4,999
+          </p>
+        </div>
       </motion.div>
 
-      {/* Main Header */}
+      {/* Main Navbar - Light Boutique Luxury */}
       <motion.header
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3, duration: 0.8 }}
-        className={`fixed top-[38px] left-0 right-0 z-40 transition-all duration-500 ease-out ${
-          showDarkBg
-            ? "bg-[oklch(0.12_0.02_50)]/90 backdrop-blur-2xl shadow-[0_4px_30px_rgba(0,0,0,0.15)] border-b border-[oklch(0.98_0.005_85)]/5"
-            : "bg-transparent"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3, duration: 1 }}
+        className={`fixed top-[48px] left-0 right-0 z-40 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+          isScrolled
+            ? "bg-gradient-to-b from-[oklch(0.99_0.005_90)]/98 via-[oklch(0.98_0.008_88)]/98 to-[oklch(0.97_0.01_86)]/98 backdrop-blur-xl shadow-[0_4px_30px_-10px_oklch(0.30_0.03_50/0.08)] border-b border-[oklch(0.92_0.02_75)]/30"
+            : "bg-gradient-to-b from-[oklch(0.99_0.005_90)] to-[oklch(0.98_0.01_88)]"
         }`}
       >
         <nav className="w-full">
-          <div className="container mx-auto px-6 lg:px-12 xl:px-20">
+          <div className="container mx-auto px-6 sm:px-8 lg:px-12 xl:px-24">
             {/* Desktop Layout */}
-            <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] items-center h-20 xl:h-24 gap-8">
-              {/* Left Navigation */}
-              <div className="flex items-center justify-start gap-8 xl:gap-10">
-                {leftNavLinks.map((link) => (
-                  <Link
+            <div className="hidden lg:flex items-center justify-between h-28 xl:h-32">
+              {/* Left Section - Logo & Boutique Tagline */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="flex items-center gap-6"
+              >
+                <Link href="/" className="group">
+                  <div className="flex flex-col items-start">
+                    <h1 className="font-serif text-[2.2rem] xl:text-[2.5rem] font-extralight text-[oklch(0.25_0.02_50)] tracking-[0.15em] group-hover:text-[oklch(0.35_0.04_55)] transition-colors duration-500">
+                      HIRU
+                    </h1>
+                    <p className="font-serif text-[11px] xl:text-[12px] font-light text-[oklch(0.55_0.04_60)] tracking-[0.35em] -mt-1 group-hover:text-[oklch(0.65_0.05_65)] transition-colors duration-500">
+                      Elegance
+                    </p>
+                  </div>
+                </Link>
+                <div className="hidden xl:block h-8 w-[1px] bg-gradient-to-b from-transparent via-[oklch(0.80_0.05_75)] to-transparent" />
+                <p className="hidden xl:block font-serif text-[11px] font-light italic text-[oklch(0.60_0.04_60)] tracking-wide">
+                  Boutique of Quiet Luxury
+                </p>
+              </motion.div>
+
+              {/* Center Section - Navigation Links */}
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6, duration: 0.8 }}
+                className="flex items-center gap-10 xl:gap-14"
+              >
+                {navLinks.map((link, index) => (
+                  <motion.div
                     key={link.name}
-                    href={link.href}
-                    className="relative text-[11px] xl:text-xs tracking-[0.2em] uppercase font-light text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300 group whitespace-nowrap"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.7 + index * 0.08, duration: 0.6 }}
                   >
-                    {link.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[oklch(0.80_0.06_75)] transition-all duration-300 group-hover:w-full" />
-                  </Link>
-                ))}
-              </div>
-
-              {/* Center Logo */}
-              <Link href="/" className="flex-shrink-0 px-6">
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5, duration: 0.8 }}
-                  className="flex flex-col items-center justify-center"
-                >
-                  <span className="font-serif text-[26px] xl:text-[30px] tracking-[0.25em] font-light text-[oklch(0.98_0.005_85)] uppercase">
-                    HIRU
-                  </span>
-                  <span className="font-serif text-[13px] xl:text-[14px] tracking-[0.35em] font-light text-[oklch(0.85_0.05_80)] uppercase -mt-1">
-                    Elegance
-                  </span>
-                </motion.div>
-              </Link>
-
-              {/* Right Navigation + Icons */}
-              <div className="flex items-center justify-end gap-8 xl:gap-10">
-                {rightNavLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="relative text-[11px] xl:text-xs tracking-[0.2em] uppercase font-light text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300 group whitespace-nowrap"
-                  >
-                    {link.name}
-                    <span className="absolute -bottom-1 left-0 w-0 h-[1px] bg-[oklch(0.80_0.06_75)] transition-all duration-300 group-hover:w-full" />
-                  </Link>
-                ))}
-
-                {/* Divider */}
-                <div className="w-[1px] h-5 bg-[oklch(0.98_0.005_85)]/20" />
-
-                {/* Icons */}
-                <div className="flex items-center gap-5">
-                  <div className="relative">
-  <input
-    ref={inputRef}
-    type="text"
-    placeholder="Search products..."
-    value={searchTerm}
-    onChange={(e) => { setSearchTerm(e.target.value); setShowSuggestions(true); }}
-    onFocus={() => setShowSuggestions(true)}
-    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-    className="w-48 px-2 py-1 rounded bg-[oklch(0.95_0.01_85)] text-[oklch(0.15_0.02_50)] focus:outline-none"
-  />
-  <AnimatePresence>
-    {showSuggestions && filteredProducts.length > 0 && (
-      <motion.ul
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        className="absolute left-0 right-0 mt-1 bg-white shadow-lg rounded z-10"
-      >
-        {filteredProducts.map((p) => (
-          <li
-            key={p.id}
-            onMouseDown={() => handleSelect(p.id)}
-            className="flex items-center p-2 hover:bg-[oklch(0.90_0.02_80)] cursor-pointer"
-          >
-            <Image src={p.image} alt={p.name} width={40} height={40} className="object-cover mr-2 rounded" />
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{p.name}</span>
-              <span className="text-xs text-[oklch(0.45_0.02_55)]">{p.priceString}</span>
-            </div>
-          </li>
-        ))}
-      </motion.ul>
-    )}
-  </AnimatePresence>
-</div>
-                  <Link href={user ? "/profile" : "/login"} className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
-                    <User className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                  </Link>
-                  <Link href="/wishlist" className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
-                    <Heart className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                    {wishlistCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
-                        {wishlistCount}
-                      </span>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="relative group font-serif text-[13px] xl:text-[14px] font-light tracking-wider text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500"
+                      >
+                        {link.name}
+                        <span className="absolute -bottom-2 left-0 w-0 h-[1.5px] bg-gradient-to-r from-[oklch(0.75_0.08_75)] to-[oklch(0.80_0.07_80)] group-hover:w-full transition-all duration-500 ease-out" />
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="relative group"
+                      >
+                        <span className={`font-serif text-[13px] xl:text-[14px] font-light tracking-wider transition-colors duration-500 ${
+                          isActiveLink(link.href)
+                            ? "text-[oklch(0.25_0.02_50)]"
+                            : "text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)]"
+                        }`}>
+                          {link.name}
+                        </span>
+                        {isActiveLink(link.href) ? (
+                          <span className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-0.5 bg-[oklch(0.92_0.04_80)] rounded-full">
+                            <span className="absolute bottom-0 left-0 right-0 h-[1px] bg-[oklch(0.75_0.06_75)]" />
+                          </span>
+                        ) : (
+                          <span className="absolute -bottom-2 left-0 w-0 h-[1.5px] bg-gradient-to-r from-[oklch(0.75_0.08_75)] to-[oklch(0.80_0.07_80)] group-hover:w-full transition-all duration-500 ease-out" />
+                        )}
+                      </Link>
                     )}
-                  </Link>
-                  <Link href="/cart" className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300">
-                    <ShoppingBag className="h-[18px] w-[18px]" strokeWidth={1.5} />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                  </Link>
-                </div>
-              </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Right Section - Icons */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8, duration: 0.8 }}
+                className="flex items-center gap-5 xl:gap-6"
+              >
+                <button className="group relative p-2 text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <Search className="w-5 h-5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
+                </button>
+                <button className="group relative p-2 text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <User className="w-5 h-5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
+                </button>
+                <button className="group relative p-2 text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <Heart className="w-5 h-5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
+                </button>
+                <button className="group relative p-2 text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <ShoppingBag className="w-5 h-5 xl:w-[18px] xl:h-[18px]" strokeWidth={1.5} />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-gradient-to-br from-[oklch(0.75_0.08_75)] to-[oklch(0.70_0.07_73)] text-white text-[9px] font-medium rounded-full flex items-center justify-center shadow-sm">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
+              </motion.div>
             </div>
 
             {/* Mobile/Tablet Layout */}
-            <div className="flex lg:hidden items-center justify-between h-16">
+            <div className="flex lg:hidden items-center justify-between h-20">
               {/* Mobile Menu Button */}
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="text-[oklch(0.98_0.005_85)] hover:bg-transparent hover:text-[oklch(0.80_0.06_75)] -ml-2"
+                    className="text-[oklch(0.35_0.03_50)] hover:bg-[oklch(0.96_0.015_80)] hover:text-[oklch(0.25_0.02_50)] -ml-2 transition-colors duration-500"
                   >
-                    <Menu className="h-6 w-6" strokeWidth={1.5} />
+                    <Menu className="h-5 w-5" strokeWidth={1.5} />
                   </Button>
                 </SheetTrigger>
-                <SheetContent 
-                  side="left" 
-                  className="w-full sm:w-[400px] bg-[oklch(0.12_0.02_50)] border-none p-0"
+                <SheetContent
+                  side="left"
+                  className="w-full sm:w-[380px] bg-gradient-to-b from-[oklch(0.98_0.01_88)] to-[oklch(0.96_0.015_85)] border-none p-0"
                 >
                   <div className="flex flex-col h-full">
                     {/* Mobile Menu Header */}
-                    <div className="flex items-center justify-between px-8 py-6 border-b border-[oklch(0.98_0.005_85)]/10">
-                      <div className="flex flex-col">
-                        <span className="font-serif text-xl tracking-[0.2em] font-light text-[oklch(0.98_0.005_85)] uppercase">
+                    <div className="flex items-center justify-between px-8 py-6 border-b border-[oklch(0.90_0.02_75)]/40">
+                      <Link href="/" className="flex flex-col" onClick={() => setIsMobileMenuOpen(false)}>
+                        <span className="font-serif text-[1.8rem] font-extralight text-[oklch(0.25_0.02_50)] tracking-[0.15em]">
                           HIRU
                         </span>
-                        <span className="font-serif text-[10px] tracking-[0.3em] font-light text-[oklch(0.85_0.05_80)] uppercase -mt-0.5">
+                        <span className="font-serif text-[11px] font-light text-[oklch(0.55_0.04_60)] tracking-[0.35em] -mt-0.5">
                           Elegance
                         </span>
-                      </div>
+                      </Link>
                       <SheetClose asChild>
-                        <Button variant="ghost" size="icon" className="text-[oklch(0.98_0.005_85)] hover:bg-transparent">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-[oklch(0.45_0.03_55)] hover:bg-[oklch(0.95_0.01_80)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500"
+                        >
                           <X className="h-5 w-5" strokeWidth={1.5} />
                         </Button>
                       </SheetClose>
                     </div>
 
                     {/* Mobile Menu Links */}
-                    <div className="flex-1 px-8 py-10">
-                      <div className="space-y-6">
-                        {allNavLinks.map((link, index) => (
+                    <div className="flex-1 px-8 py-12">
+                      <div className="space-y-8">
+                        {navLinks.map((link, index) => (
                           <motion.div
                             key={link.name}
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.1 }}
+                            transition={{ delay: index * 0.1, duration: 0.6 }}
                           >
-                            <Link
-                              href={link.href}
-                              onClick={() => setIsMobileMenuOpen(false)}
-                              className="block text-2xl font-serif font-light text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors duration-300"
-                            >
-                              {link.name}
-                            </Link>
+                            {link.external ? (
+                              <a
+                                href={link.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block font-serif text-2xl font-light text-[oklch(0.35_0.03_50)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-300"
+                              >
+                                {link.name}
+                              </a>
+                            ) : (
+                              <Link
+                                href={link.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="block font-serif text-2xl font-light text-[oklch(0.35_0.03_50)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-300"
+                              >
+                                {link.name}
+                              </Link>
+                            )}
                           </motion.div>
                         ))}
                       </div>
                     </div>
 
                     {/* Mobile Menu Footer */}
-                    <div className="px-8 py-8 border-t border-[oklch(0.98_0.005_85)]/10">
+                    <div className="px-8 py-8 border-t border-[oklch(0.90_0.02_75)]/40">
+                      <p className="font-serif text-[11px] font-light italic text-[oklch(0.55_0.04_60)] tracking-wide mb-6">
+                        Boutique of Quiet Luxury
+                      </p>
                       <div className="flex items-center gap-6">
-                        <Link 
-                          href={user ? "/profile" : "/login"} 
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors"
-                        >
-                          <User className="h-5 w-5" strokeWidth={1.5} />
-                        </Link>
-                        <Link 
-                          href="/wishlist" 
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="relative text-[oklch(0.95_0.01_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors"
-                        >
-                          <Heart className="h-5 w-5" strokeWidth={1.5} />
-                          {wishlistCount > 0 && (
-                            <span className="absolute -top-1.5 -right-1.5 w-3.5 h-3.5 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[8px] font-medium rounded-full flex items-center justify-center">
-                              {wishlistCount}
-                            </span>
-                          )}
-                        </Link>
+                        <button className="text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-300">
+                          <User className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
+                        <button className="text-[oklch(0.45_0.03_55)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-300">
+                          <Heart className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -292,28 +261,28 @@ export function Navbar() {
               {/* Mobile Logo */}
               <Link href="/" className="absolute left-1/2 -translate-x-1/2">
                 <div className="flex flex-col items-center">
-                  <span className="font-serif text-lg tracking-[0.2em] font-light text-[oklch(0.98_0.005_85)] uppercase">
+                  <span className="font-serif text-[1.6rem] font-extralight text-[oklch(0.25_0.02_50)] tracking-[0.18em]">
                     HIRU
                   </span>
-                  <span className="font-serif text-[9px] tracking-[0.3em] font-light text-[oklch(0.85_0.05_80)] uppercase -mt-0.5">
+                  <span className="font-serif text-[10px] font-light text-[oklch(0.55_0.04_60)] tracking-[0.35em] -mt-0.5">
                     Elegance
                   </span>
                 </div>
               </Link>
 
               {/* Mobile Icons */}
-              <div className="flex items-center gap-4 -mr-2">
-                <Link href="/search" className="text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
-                  <Search className="h-5 w-5" strokeWidth={1.5} />
-                </Link>
-                <Link href="/cart" className="relative text-[oklch(0.98_0.005_85)] hover:text-[oklch(0.80_0.06_75)] transition-colors">
-                  <ShoppingBag className="h-5 w-5" strokeWidth={1.5} />
+              <div className="flex items-center gap-3 -mr-2">
+                <button className="p-2 text-[oklch(0.35_0.03_50)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <Search className="w-5 h-5" strokeWidth={1.5} />
+                </button>
+                <button className="relative p-2 text-[oklch(0.35_0.03_50)] hover:text-[oklch(0.25_0.02_50)] transition-colors duration-500">
+                  <ShoppingBag className="w-5 h-5" strokeWidth={1.5} />
                   {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-[oklch(0.80_0.06_75)] text-[oklch(0.15_0.02_50)] text-[9px] font-medium rounded-full flex items-center justify-center">
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-gradient-to-br from-[oklch(0.75_0.08_75)] to-[oklch(0.70_0.07_73)] text-white text-[8px] font-medium rounded-full flex items-center justify-center">
                       {cartCount}
                     </span>
                   )}
-                </Link>
+                </button>
               </div>
             </div>
           </div>
